@@ -1,0 +1,25 @@
+[project]
+name = "starrstack-auth"
+version = "0.1.0"
+description = "Shared Auth0 authentication for StarrStack FastAPI projects"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.115.0",
+  "authlib>=1.3.0",
+  "httpx>=0.27.0",
+  "itsdangerous>=2.1.0"
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "pytest-asyncio>=0.23.0",
+  "httpx>=0.27.0"
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/starrstack_auth"]
