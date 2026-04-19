@@ -31,6 +31,11 @@ def _build_router(oauth: OAuth) -> APIRouter:
     @router.get("/login")
     async def login(request: Request):
         callback_url = str(request.url_for("auth_callback"))
+        # Behind a reverse proxy (Cloudflare, nginx), the scheme may be
+        # reported as http even though the client connected via https.
+        proto = request.headers.get("x-forwarded-proto")
+        if proto == "https" and callback_url.startswith("http://"):
+            callback_url = "https://" + callback_url[7:]
         return await oauth.auth0.authorize_redirect(request, callback_url)
 
     @router.get("/callback", name="auth_callback")
@@ -46,6 +51,9 @@ def _build_router(oauth: OAuth) -> APIRouter:
         client_id = os.environ["AUTH0_CLIENT_ID"]
         # Build the base URL (scheme + host) for the return-to parameter
         base_url = str(request.base_url).rstrip("/")
+        proto = request.headers.get("x-forwarded-proto")
+        if proto == "https" and base_url.startswith("http://"):
+            base_url = "https://" + base_url[7:]
         return_to = quote_plus(base_url)
         logout_url = (
             f"https://{domain}/v2/logout"
